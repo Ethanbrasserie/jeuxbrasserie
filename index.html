@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unboared - 10 Jeux Rapides</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #eee;
+    text-align: center;
+    margin: 0; padding: 0;
+  }
+  header {
+    background: #1f1f1f;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  #menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #222;
+    padding: 10px;
+  }
+  .game-btn {
+    background: #4CAF50;
+    border: none;
+    color: white;
+    margin: 5px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 1 1 140px;
+    max-width: 150px;
+    transition: background 0.3s;
+  }
+  .game-btn:hover {
+    background: #45a049;
+  }
+  #game-container {
+    padding: 20px;
+    min-height: 320px;
+  }
+  #message {
+    margin-top: 20px;
+    font-size: 22px;
+  }
+  button.answer-btn {
+    background: #008CBA;
+    margin: 10px;
+    padding: 15px 30px;
+    font-size: 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button.answer-btn:hover {
+    background: #007B9E;
+  }
+  input[type=text], input[type=number] {
+    font-size: 18px;
+    padding: 8px;
+    width: 200px;
+    border-radius: 6px;
+    border: none;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>Unboared - 10 Jeux Rapides</header>
+
+<div id="menu"></div>
+
+<div id="game-container"></div>
+<div id="message"></div>
+
+<script>
+const menu = document.getElementById('menu');
+const container = document.getElementById('game-container');
+const message = document.getElementById('message');
+
+// Liste des jeux (10)
+const games = [
+  { id: 'vf', name: "Vrai ou Faux", fn: vraiOuFaux },
+  { id: 'rapidite', name: "Jeu de Rapidité", fn: jeuRapidite },
+  { id: 'memory', name: "Memory Simple", fn: jeuMemory },
+  { id: 'devinette', name: "Devinettes à choix", fn: jeuDevinette },
+  { id: 'clicvite', name: "Clique vite", fn: jeuCliqueVite },
+  { id: 'calcul', name: "Calcul rapide", fn: jeuCalcul },
+  { id: 'reaction', name: "Réaction GO", fn: jeuReaction },
+  { id: 'ordre', name: "Classe les nombres", fn: jeuOrdre },
+  { id: 'trouveintrus', name: "Trouve l'intrus", fn: jeuTrouveIntrus },
+  { id: 'pattern', name: "Suis le pattern", fn: jeuPattern },
+];
+
+// Création menu
+games.forEach(g => {
+  const btn = document.createElement('button');
+  btn.textContent = g.name;
+  btn.classList.add('game-btn');
+  btn.onclick = () => {
+    message.textContent = '';
+    g.fn();
+  };
+  menu.appendChild(btn);
+});
+
+function reset() {
+  container.innerHTML = '';
+  message.textContent = '';
+}
+
+// --- JEUX ---
+
+// 1 - Vrai ou Faux
+function vraiOuFaux() {
+  reset();
+  const questions = [
+    { q: "Le soleil est une étoile.", a: true },
+    { q: "Les poissons peuvent voler.", a: false },
+    { q: "L'eau bout à 100°C.", a: true },
+    { q: "Les chats aiment l'eau.", a: false },
+  ];
+  let index = 0;
+  let score = 0;
+
+  function showQuestion() {
+    if(index >= questions.length) {
+      container.innerHTML = `<h3>Fini ! Score : ${score} / ${questions.length}</h3>`;
+      return;
+    }
+    const q = questions[index];
+    container.innerHTML = `<h2>${q.q}</h2>
+      <button class="answer-btn" onclick="answer(true)">Vrai</button>
+      <button class="answer-btn" onclick="answer(false)">Faux</button>`;
+  }
+  window.answer = function(val) {
+    if(val === questions[index].a) score++;
+    index++;
+    showQuestion();
+  };
+  showQuestion();
+}
+
+// 2 - Jeu de rapidité
+function jeuRapidite() {
+  reset();
+  container.innerHTML = `<h2>Attends le bouton vert puis clique vite !</h2>`;
+  const btn = document.createElement('button');
+  btn.textContent = 'Patiente...';
+  btn.style.fontSize = '30px';
+  btn.style.padding = '20px 40px';
+  btn.disabled = true;
+  container.appendChild(btn);
+
+  const wait = Math.floor(Math.random() * 4000) + 2000;
+  let startTime;
+
+  setTimeout(() => {
+    btn.style.backgroundColor = 'green';
+    btn.textContent = 'Clique !';
+    btn.disabled = false;
+    startTime = Date.now();
+  }, wait);
+
+  btn.onclick = () => {
+    if (!startTime) return;
+    const diff = Date.now() - startTime;
+    container.innerHTML = `<h3>Bravo ! Temps de réaction: ${diff} ms</h3>`;
+  };
+}
+
+// 3 - Memory simple (4 paires)
+function jeuMemory() {
+  reset();
+  const cards = ['🍎','🍎','🍌','🍌','🍇','🍇','🥭','🥭'];
+  cards.sort(() => Math.random() - 0.5);
+  let first = null;
+  let second = null;
+  let matched = 0;
+
+  cards.forEach((emoji, i) => {
+    const c = document.createElement('button');
+    c.textContent = '❓';
+    c.style.fontSize = '40px';
+    c.style.margin = '10px';
+    c.style.width = '60px';
+    c.style.height = '60px';
+    c.onclick = () => {
+      if(c.textContent !== '❓' || second) return;
+      c.textContent = emoji;
+      if(!first) first = c;
+      else {
+        second = c;
+        if(first.textContent === second.textContent) {
+          matched += 2;
+          first = null;
+          second = null;
+          if(matched === cards.length) {
+            container.innerHTML = `<h3>Bravo ! Tu as fini le Memory !</h3>`;
+          }
+        } else {
+          setTimeout(() => {
+            first.textContent = '❓';
+            second.textContent = '❓';
+            first = null;
+            second = null;
+          }, 1000);
+        }
+      }
+    };
+    container.appendChild(c);
+  });
+}
+
+// 4 - Devinettes à choix multiples
+function jeuDevinette() {
+  reset();
+  const questions = [
+    {
+      q: "Je suis jaune et courbé. Qui suis-je ?",
+      options: ["Banane", "Pomme", "Orange"],
+      answer: "Banane"
+    },
+    {
+      q: "Je suis rouge et je pique. Qui suis-je ?",
+      options: ["Piment", "Tomate", "Fraise"],
+      answer: "Piment"
+    },
+    {
+      q: "Je vole sans ailes. Qui suis-je ?",
+      options: ["Vent", "Oiseau", "Papillon"],
+      answer: "Vent"
+    }
+  ];
+  let index = 0;
+
+  function showQuestion() {
+    if(index >= questions.length) {
+      container.innerHTML = `<h3>Fini les devinettes ! Bravo !</h3>`;
+      return;
+    }
+    const q = questions[index];
+    container.innerHTML = `<h2>${q.q}</h2>`;
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.className = 'answer-btn';
+      btn.onclick = () => {
+        if(opt === q.answer) {
+          message.textContent = 'Bonne réponse !';
+          index++;
+          setTimeout(() => {
+            message.textContent = '';
+            showQuestion();
+          }, 1000);
+        } else {
+          message.textContent = 'Mauvaise réponse, essaie encore !';
+        }
+      };
+      container.appendChild(btn);
+    });
+  }
+  showQuestion();
+}
+
+// 5 - Clique vite (compte les clics en 5s)
+function jeuCliqueVite() {
+  reset();
+  container.innerHTML = `<h2>Clique vite sur le bouton pendant 5 secondes !</h2>`;
+  const btn = document.createElement('button');
+  btn.textContent = 'Clique-moi';
+  btn.style.fontSize = '30px';
+  btn.style.padding = '20px 40px';
+  container.appendChild(btn);
+  let count = 0;
+
+  btn.onclick = () => {
+    count++;
+    message.textContent = `Clics: ${count}`;
+  };
+
+  setTimeout(() => {
+    btn.disabled = true;
+    message.textContent = `Temps écoulé ! Total clics: ${count}`;
+  }, 5000);
+}
+
+// 6 - Calcul rapide (addition)
+function jeuCalcul() {
+  reset();
+  let a = Math.floor(Math.random()*20)+1;
+  let b = Math.floor(Math.random()*20)+1;
+  const reponse = a + b;
+
+  container.innerHTML = `<h2>Combien fait ${a} + ${b} ?</h2>
+  <input type="number" id="calcAnswer" />
+  <br/><br/>
+  <button class="answer-btn" onclick="verifCalc()">Valider</button>
+  <div id="result"></div>`;
+
+  window.verifCalc = function() {
+    const val = parseInt(document.getElementById('calcAnswer').value);
+    if(val === reponse) {
+      message.textContent = "Bravo, bonne réponse !";
+    } else {
+      message.textContent = `Faux, la bonne réponse est ${reponse}`;
+    }
+  };
+}
+
+// 7 - Réaction GO (attends le GO puis clique)
+function jeuReaction() {
+  reset();
+  container.innerHTML = `<h2>Attends le signal "GO" et clique vite !</h2>`;
+  const btn = document.createElement('button');
+  btn.textContent = 'Patiente...';
+  btn.style.fontSize = '30px';
+  btn.style.padding = '20px 40px';
+  btn.disabled = true;
+  container.appendChild(btn);
+
+  let startTime;
+
+  const wait = Math.floor(Math.random()*5000)+2000;
+  setTimeout(() => {
+    btn.textContent = 'GO ! Clique !';
+    btn.style.backgroundColor = 'green';
+    btn.disabled = false;
+    startTime = Date.now();
+  }, wait);
+
+  btn.onclick = () => {
+    if (!startTime) {
+      message.textContent = "Trop tôt ! Attends le signal GO.";
+      return;
+    }
+    const diff = Date.now() - startTime;
+    container.innerHTML = `<h3>Ton temps de réaction : ${diff} ms</h3>`;
+  };
+}
+
+// 8 - Classe les nombres (ordre croissant)
+function jeuOrdre() {
+  reset();
+  const nums = [];
+  while(nums.length<4) {
+    const n = Math.floor(Math.random()*50)+1;
+    if(!nums.includes(n)) nums.push(n);
+  }
+  const shuffled = [...nums].sort(() => Math.random()-0.5);
+
+  container.innerHTML = `<h2>Classe ces nombres dans l'ordre croissant :</h2>
+  <div id="numList">${shuffled.map(n => `<button class="answer-btn" onclick="selectNum(${n})">${n}</button>`).join('')}</div>
+  <div style="margin-top:20px;">
+    <h3>Ta sélection :</h3>
+    <div id="selection"></div>
+    <button id="verifBtn" class="answer-btn" disabled>Vérifier</button>
+  </div>`;
+
+  const selection = [];
+  window.selectNum = function(n) {
+    if(selection.includes(n)) return;
+    if(selection.length >= shuffled.length) return;
+    selection.push(n);
+    updateSelection();
+  };
+
+  function updateSelection() {
+    const selDiv = document.getElementById('selection');
+    selDiv.innerHTML = selection.map(n => `<span style="margin:5px; font-size:20px;">${n}</span>`).join('');
+    document.getElementById('verifBtn').disabled = selection.length !== shuffled.length;
+  }
+
+  document.getElementById('verifBtn').onclick = () => {
+    const sortedSel = [...selection].sort((a,b) => a-b);
+    if(sortedSel.every((v,i) => v === selection[i])) {
+      message.textContent = "Bravo, c'est dans le bon ordre !";
+    } else {
+      message.textContent = `Non, l'ordre correct est : ${sortedSel.join(', ')}`;
+    }
+    selection.length = 0;
+    updateSelection();
+  };
+}
+
+// 9 - Trouve l'intrus
+function jeuTrouveIntrus() {
+  reset();
+  const groupes = [
+    {items: ['🍎','🍌','🍇','🍓','🥦'], intrus: '🥦'}, // fruits + un légume
+    {items: ['⚽️','🏀','🎾','🚗','🏈'], intrus: '🚗'}, // balles + voiture
+    {items: ['🐶','🐱','🐭','🍕','🐰'], intrus: '🍕'}, // animaux + nourriture
+  ];
+  const g = groupes[Math.floor(Math.random()*groupes.length)];
+  const shuffled = [...g.items].sort(() => Math.random()-0.5);
+
+  container.innerHTML = `<h2>Trouve l'intrus :</h2>
+  <div>${shuffled.map(i => `<button class="answer-btn" onclick="checkIntrus('${i}')">${i}</button>`).join('')}</div>`;
+
+  window.checkIntrus = function(c) {
+    if(c === g.intrus) {
+      message.textContent = "Bravo, tu as trouvé l'intrus !";
+    } else {
+      message.textContent = "Non, ce n'est pas l'intrus, essaie encore.";
+    }
+  };
+}
+
+// 10 - Suis le pattern (suite de couleurs)
+function jeuPattern() {
+  reset();
+  const colors = ['red','green','blue','yellow'];
+  const pattern = [];
+  let playerPattern = [];
+  let step = 0;
+
+  container.innerHTML = `<h2>Suis le pattern de couleurs !</h2>
+  <div id="pattern-boxes"></div>
+  <button id="startPattern" class="answer-btn">Commencer</button>`;
+
+  const patternBoxes = document.getElementById('pattern-boxes');
+  const startBtn = document.getElementById('startPattern');
+
+  function addColor() {
+    pattern.push(colors[Math.floor(Math.random()*colors.length)]);
+  }
+  function showPattern(i=0) {
+    if(i >= pattern.length) {
+      container.appendChild(startBtn);
+      startBtn.textContent = 'À toi ! Clique le pattern';
+      playerPattern = [];
+      step = 0;
+      return;
+    }
+    patternBoxes.innerHTML = '';
+    const c = document.createElement('div');
+    c.style.width = '100px';
+    c.style.height = '100px';
+    c.style.margin = 'auto';
+    c.style.borderRadius = '10px';
+    c.style.backgroundColor = pattern[i];
+    container.appendChild(patternBoxes);
+    setTimeout(() => {
+      c.style.backgroundColor = '#333';
+      setTimeout(() => showPattern(i+1), 300);
+    }, 700);
+  }
+
+  function createColorButtons() {
+    colors.forEach(col => {
+      const b = document.createElement('button');
+      b.style.backgroundColor = col;
+      b.style.width = '70px';
+      b.style.height = '70px';
+      b.style.margin = '10px';
+      b.style.border = 'none';
+      b.style.borderRadius = '50%';
+      b.style.cursor = 'pointer';
+      b.title = col;
+      b.onclick = () => {
+        playerPattern.push(col);
+        if (pattern[playerPattern.length-1] !== col) {
+          message.textContent = 'Perdu ! Mauvais pattern.';
+          startBtn.disabled = false;
+        } else if(playerPattern.length === pattern.length) {
+          message.textContent = 'Bravo ! Tu as réussi ce round.';
+          startBtn.disabled = false;
+        }
+      };
+      patternBoxes.appendChild(b);
+    });
+  }
+
+  startBtn.onclick = () => {
+    message.textContent = '';
+    startBtn.disabled = true;
+    addColor();
+    patternBoxes.innerHTML = '';
+    createColorButtons();
+    showPattern();
+  };
+}
+</script>
+
+</body>
+</html>
