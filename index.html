@@ -2,492 +2,503 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Unboared - 10 Jeux Rapides</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2ème partie - Les 10 Défis</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #121212;
-    color: #eee;
-    text-align: center;
-    margin: 0; padding: 0;
-  }
-  header {
-    background: #1f1f1f;
-    padding: 15px;
-    font-size: 24px;
-    font-weight: bold;
-  }
-  #menu {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    background: #222;
-    padding: 10px;
-  }
-  .game-btn {
-    background: #4CAF50;
-    border: none;
-    color: white;
-    margin: 5px;
-    padding: 10px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    flex: 1 1 140px;
-    max-width: 150px;
-    transition: background 0.3s;
-  }
-  .game-btn:hover {
-    background: #45a049;
-  }
-  #game-container {
-    padding: 20px;
-    min-height: 320px;
-  }
-  #message {
-    margin-top: 20px;
-    font-size: 22px;
-  }
-  button.answer-btn {
-    background: #008CBA;
-    margin: 10px;
-    padding: 15px 30px;
-    font-size: 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  button.answer-btn:hover {
-    background: #007B9E;
-  }
-  input[type=text], input[type=number] {
-    font-size: 18px;
-    padding: 8px;
-    width: 200px;
-    border-radius: 6px;
-    border: none;
-    margin-top: 10px;
-  }
+  body { font-family: Arial, sans-serif; background: #1a1a1a; color: #f5f5f5; text-align: center; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+  header { background: #0e0e0e; padding: 15px; font-size: 24px; font-weight: bold; }
+  #story-message { background: #3a3a3a; padding: 10px; font-size: 1.2em; color: #ff9800; }
+  #menu { display: flex; flex-wrap: wrap; justify-content: center; background: #222; padding: 10px; }
+  .game-btn { background: #4CAF50; border: none; color: white; margin: 5px; padding: 10px 15px; border-radius: 6px; cursor: pointer; flex: 1 1 140px; max-width: 150px; transition: background 0.3s; }
+  .game-btn.completed { background: #008CBA; }
+  .game-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #game-container { padding: 20px; min-height: 320px; }
+  #message { margin-top: 20px; font-size: 22px; }
+  #reveal-container { display: none; margin-top: 50px; }
+  .reveal-btn { background: #ff4500; border: none; color: white; padding: 20px 40px; font-size: 2em; border-radius: 10px; cursor: pointer; }
+  button.answer-btn { background: #008CBA; margin: 10px; padding: 15px 30px; font-size: 20px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.3s; }
+  button.answer-btn:hover { background: #007B9E; }
+  input[type=text], input[type=number] { font-size: 18px; padding: 8px; width: 200px; border-radius: 6px; border: none; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<header>Unboared - 10 Jeux Rapides</header>
-
+<header>
+  <span>2ème partie - Les 10 Défis</span>
+</header>
+<div id="story-message">Réussis les 10 nouveaux défis pour découvrir le nom du créateur du jeu.</div>
 <div id="menu"></div>
-
 <div id="game-container"></div>
 <div id="message"></div>
+<div id="reveal-container">
+    <h2>Félicitations ! Vous avez réussi tous les défis.</h2>
+    <h3>Cliquez sur le bouton pour découvrir le nom de l'énigmiste.</h3>
+    <button class="reveal-btn" onclick="revealCreatorName()">Découvrir le nom</button>
+</div>
 
 <script>
-const menu = document.getElementById('menu');
-const container = document.getElementById('game-container');
-const message = document.getElementById('message');
+// État du jeu
+const gameProgress = JSON.parse(localStorage.getItem('gameProgress')) || {};
 
-// Liste des jeux (10)
+// Vérifie si tous les défis sont terminés
+function checkAllGamesCompleted() {
+    const allCompleted = games.every(game => gameProgress[game.id]);
+    if (allCompleted) {
+        document.getElementById('reveal-container').style.display = 'block';
+        document.getElementById('story-message').textContent = "Tu as réussi tous les défis !";
+    } else {
+        document.getElementById('reveal-container').style.display = 'none';
+        const completedCount = Object.keys(gameProgress).length;
+        document.getElementById('story-message').textContent = `Défis réussis : ${completedCount} / 10. Courage !`;
+    }
+}
+
+// Fonction appelée quand un défi est réussi
+function completeDefi(id) {
+    if (!gameProgress[id]) {
+        gameProgress[id] = true;
+        localStorage.setItem('gameProgress', JSON.stringify(gameProgress));
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.classList.add('completed');
+        }
+        checkAllGamesCompleted();
+    }
+}
+
+// Révélation du nom du créateur
+function revealCreatorName() {
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+    container.innerHTML = '<h1>Le nom du créateur est... ETHAN !</h1><p>Merci d\'avoir joué !</p>';
+    message.textContent = "";
+    document.getElementById('reveal-container').style.display = 'none';
+}
+
+// --- Les 10 NOUVEAUX défis ---
 const games = [
-  { id: 'vf', name: "Vrai ou Faux", fn: vraiOuFaux },
-  { id: 'rapidite', name: "Jeu de Rapidité", fn: jeuRapidite },
-  { id: 'memory', name: "Memory Simple", fn: jeuMemory },
-  { id: 'devinette', name: "Devinettes à choix", fn: jeuDevinette },
-  { id: 'clicvite', name: "Clique vite", fn: jeuCliqueVite },
-  { id: 'calcul', name: "Calcul rapide", fn: jeuCalcul },
-  { id: 'reaction', name: "Réaction GO", fn: jeuReaction },
-  { id: 'ordre', name: "Classe les nombres", fn: jeuOrdre },
-  { id: 'trouveintrus', name: "Trouve l'intrus", fn: jeuTrouveIntrus },
-  { id: 'pattern', name: "Suis le pattern", fn: jeuPattern },
+    { id: 'devinechiffre', name: "Défi 1: Devine le chiffre", fn: jeuDevineChiffre },
+    { id: 'melange', name: "Défi 2: Mot mélangé", fn: jeuMotMelange },
+    { id: 'compte', name: "Défi 3: Compte les fruits", fn: jeuCompteFruits },
+    { id: 'ordrealpha', name: "Défi 4: Ordre alphabétique", fn: jeuOrdreAlpha },
+    { id: 'couleurmemoire', name: "Défi 5: Couleurs en mémoire", fn: jeuCouleurMemoire },
+    { id: 'riddles', name: "Défi 6: Énigmes", fn: jeuEnigmes },
+    { id: 'poids', name: "Défi 7: Le Poids Idéal", fn: jeuPoidsIdeal },
+    { id: 'veritefaux', name: "Défi 8: Vérité ou Mensonge", fn: jeuVeriteMensonge },
+    { id: 'symbole', name: "Défi 9: Le Symbole Manquant", fn: jeuSymboleManquant },
+    { id: 'seriesuite', name: "Défi 10: La Série de Formes", fn: jeuSerieFormes },
 ];
 
-// Création menu
+// Création du menu des défis
+const menu = document.getElementById('menu');
 games.forEach(g => {
-  const btn = document.createElement('button');
-  btn.textContent = g.name;
-  btn.classList.add('game-btn');
-  btn.onclick = () => {
-    message.textContent = '';
-    g.fn();
-  };
-  menu.appendChild(btn);
+    const btn = document.createElement('button');
+    btn.textContent = g.name;
+    btn.id = g.id;
+    btn.classList.add('game-btn');
+    btn.onclick = () => {
+        reset();
+        g.fn();
+    };
+    if (gameProgress[g.id]) {
+        btn.classList.add('completed');
+    }
+    menu.appendChild(btn);
 });
 
 function reset() {
-  container.innerHTML = '';
-  message.textContent = '';
-}
-
-// --- JEUX ---
-
-// 1 - Vrai ou Faux
-function vraiOuFaux() {
-  reset();
-  const questions = [
-    { q: "Le soleil est une étoile.", a: true },
-    { q: "Les poissons peuvent voler.", a: false },
-    { q: "L'eau bout à 100°C.", a: true },
-    { q: "Les chats aiment l'eau.", a: false },
-  ];
-  let index = 0;
-  let score = 0;
-
-  function showQuestion() {
-    if(index >= questions.length) {
-      container.innerHTML = `<h3>Fini ! Score : ${score} / ${questions.length}</h3>`;
-      return;
-    }
-    const q = questions[index];
-    container.innerHTML = `<h2>${q.q}</h2>
-      <button class="answer-btn" onclick="answer(true)">Vrai</button>
-      <button class="answer-btn" onclick="answer(false)">Faux</button>`;
-  }
-  window.answer = function(val) {
-    if(val === questions[index].a) score++;
-    index++;
-    showQuestion();
-  };
-  showQuestion();
-}
-
-// 2 - Jeu de rapidité
-function jeuRapidite() {
-  reset();
-  container.innerHTML = `<h2>Attends le bouton vert puis clique vite !</h2>`;
-  const btn = document.createElement('button');
-  btn.textContent = 'Patiente...';
-  btn.style.fontSize = '30px';
-  btn.style.padding = '20px 40px';
-  btn.disabled = true;
-  container.appendChild(btn);
-
-  const wait = Math.floor(Math.random() * 4000) + 2000;
-  let startTime;
-
-  setTimeout(() => {
-    btn.style.backgroundColor = 'green';
-    btn.textContent = 'Clique !';
-    btn.disabled = false;
-    startTime = Date.now();
-  }, wait);
-
-  btn.onclick = () => {
-    if (!startTime) return;
-    const diff = Date.now() - startTime;
-    container.innerHTML = `<h3>Bravo ! Temps de réaction: ${diff} ms</h3>`;
-  };
-}
-
-// 3 - Memory simple (4 paires)
-function jeuMemory() {
-  reset();
-  const cards = ['🍎','🍎','🍌','🍌','🍇','🍇','🥭','🥭'];
-  cards.sort(() => Math.random() - 0.5);
-  let first = null;
-  let second = null;
-  let matched = 0;
-
-  cards.forEach((emoji, i) => {
-    const c = document.createElement('button');
-    c.textContent = '❓';
-    c.style.fontSize = '40px';
-    c.style.margin = '10px';
-    c.style.width = '60px';
-    c.style.height = '60px';
-    c.onclick = () => {
-      if(c.textContent !== '❓' || second) return;
-      c.textContent = emoji;
-      if(!first) first = c;
-      else {
-        second = c;
-        if(first.textContent === second.textContent) {
-          matched += 2;
-          first = null;
-          second = null;
-          if(matched === cards.length) {
-            container.innerHTML = `<h3>Bravo ! Tu as fini le Memory !</h3>`;
-          }
-        } else {
-          setTimeout(() => {
-            first.textContent = '❓';
-            second.textContent = '❓';
-            first = null;
-            second = null;
-          }, 1000);
-        }
-      }
-    };
-    container.appendChild(c);
-  });
-}
-
-// 4 - Devinettes à choix multiples
-function jeuDevinette() {
-  reset();
-  const questions = [
-    {
-      q: "Je suis jaune et courbé. Qui suis-je ?",
-      options: ["Banane", "Pomme", "Orange"],
-      answer: "Banane"
-    },
-    {
-      q: "Je suis rouge et je pique. Qui suis-je ?",
-      options: ["Piment", "Tomate", "Fraise"],
-      answer: "Piment"
-    },
-    {
-      q: "Je vole sans ailes. Qui suis-je ?",
-      options: ["Vent", "Oiseau", "Papillon"],
-      answer: "Vent"
-    }
-  ];
-  let index = 0;
-
-  function showQuestion() {
-    if(index >= questions.length) {
-      container.innerHTML = `<h3>Fini les devinettes ! Bravo !</h3>`;
-      return;
-    }
-    const q = questions[index];
-    container.innerHTML = `<h2>${q.q}</h2>`;
-    q.options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.textContent = opt;
-      btn.className = 'answer-btn';
-      btn.onclick = () => {
-        if(opt === q.answer) {
-          message.textContent = 'Bonne réponse !';
-          index++;
-          setTimeout(() => {
-            message.textContent = '';
-            showQuestion();
-          }, 1000);
-        } else {
-          message.textContent = 'Mauvaise réponse, essaie encore !';
-        }
-      };
-      container.appendChild(btn);
-    });
-  }
-  showQuestion();
-}
-
-// 5 - Clique vite (compte les clics en 5s)
-function jeuCliqueVite() {
-  reset();
-  container.innerHTML = `<h2>Clique vite sur le bouton pendant 5 secondes !</h2>`;
-  const btn = document.createElement('button');
-  btn.textContent = 'Clique-moi';
-  btn.style.fontSize = '30px';
-  btn.style.padding = '20px 40px';
-  container.appendChild(btn);
-  let count = 0;
-
-  btn.onclick = () => {
-    count++;
-    message.textContent = `Clics: ${count}`;
-  };
-
-  setTimeout(() => {
-    btn.disabled = true;
-    message.textContent = `Temps écoulé ! Total clics: ${count}`;
-  }, 5000);
-}
-
-// 6 - Calcul rapide (addition)
-function jeuCalcul() {
-  reset();
-  let a = Math.floor(Math.random()*20)+1;
-  let b = Math.floor(Math.random()*20)+1;
-  const reponse = a + b;
-
-  container.innerHTML = `<h2>Combien fait ${a} + ${b} ?</h2>
-  <input type="number" id="calcAnswer" />
-  <br/><br/>
-  <button class="answer-btn" onclick="verifCalc()">Valider</button>
-  <div id="result"></div>`;
-
-  window.verifCalc = function() {
-    const val = parseInt(document.getElementById('calcAnswer').value);
-    if(val === reponse) {
-      message.textContent = "Bravo, bonne réponse !";
-    } else {
-      message.textContent = `Faux, la bonne réponse est ${reponse}`;
-    }
-  };
-}
-
-// 7 - Réaction GO (attends le GO puis clique)
-function jeuReaction() {
-  reset();
-  container.innerHTML = `<h2>Attends le signal "GO" et clique vite !</h2>`;
-  const btn = document.createElement('button');
-  btn.textContent = 'Patiente...';
-  btn.style.fontSize = '30px';
-  btn.style.padding = '20px 40px';
-  btn.disabled = true;
-  container.appendChild(btn);
-
-  let startTime;
-
-  const wait = Math.floor(Math.random()*5000)+2000;
-  setTimeout(() => {
-    btn.textContent = 'GO ! Clique !';
-    btn.style.backgroundColor = 'green';
-    btn.disabled = false;
-    startTime = Date.now();
-  }, wait);
-
-  btn.onclick = () => {
-    if (!startTime) {
-      message.textContent = "Trop tôt ! Attends le signal GO.";
-      return;
-    }
-    const diff = Date.now() - startTime;
-    container.innerHTML = `<h3>Ton temps de réaction : ${diff} ms</h3>`;
-  };
-}
-
-// 8 - Classe les nombres (ordre croissant)
-function jeuOrdre() {
-  reset();
-  const nums = [];
-  while(nums.length<4) {
-    const n = Math.floor(Math.random()*50)+1;
-    if(!nums.includes(n)) nums.push(n);
-  }
-  const shuffled = [...nums].sort(() => Math.random()-0.5);
-
-  container.innerHTML = `<h2>Classe ces nombres dans l'ordre croissant :</h2>
-  <div id="numList">${shuffled.map(n => `<button class="answer-btn" onclick="selectNum(${n})">${n}</button>`).join('')}</div>
-  <div style="margin-top:20px;">
-    <h3>Ta sélection :</h3>
-    <div id="selection"></div>
-    <button id="verifBtn" class="answer-btn" disabled>Vérifier</button>
-  </div>`;
-
-  const selection = [];
-  window.selectNum = function(n) {
-    if(selection.includes(n)) return;
-    if(selection.length >= shuffled.length) return;
-    selection.push(n);
-    updateSelection();
-  };
-
-  function updateSelection() {
-    const selDiv = document.getElementById('selection');
-    selDiv.innerHTML = selection.map(n => `<span style="margin:5px; font-size:20px;">${n}</span>`).join('');
-    document.getElementById('verifBtn').disabled = selection.length !== shuffled.length;
-  }
-
-  document.getElementById('verifBtn').onclick = () => {
-    const sortedSel = [...selection].sort((a,b) => a-b);
-    if(sortedSel.every((v,i) => v === selection[i])) {
-      message.textContent = "Bravo, c'est dans le bon ordre !";
-    } else {
-      message.textContent = `Non, l'ordre correct est : ${sortedSel.join(', ')}`;
-    }
-    selection.length = 0;
-    updateSelection();
-  };
-}
-
-// 9 - Trouve l'intrus
-function jeuTrouveIntrus() {
-  reset();
-  const groupes = [
-    {items: ['🍎','🍌','🍇','🍓','🥦'], intrus: '🥦'}, // fruits + un légume
-    {items: ['⚽️','🏀','🎾','🚗','🏈'], intrus: '🚗'}, // balles + voiture
-    {items: ['🐶','🐱','🐭','🍕','🐰'], intrus: '🍕'}, // animaux + nourriture
-  ];
-  const g = groupes[Math.floor(Math.random()*groupes.length)];
-  const shuffled = [...g.items].sort(() => Math.random()-0.5);
-
-  container.innerHTML = `<h2>Trouve l'intrus :</h2>
-  <div>${shuffled.map(i => `<button class="answer-btn" onclick="checkIntrus('${i}')">${i}</button>`).join('')}</div>`;
-
-  window.checkIntrus = function(c) {
-    if(c === g.intrus) {
-      message.textContent = "Bravo, tu as trouvé l'intrus !";
-    } else {
-      message.textContent = "Non, ce n'est pas l'intrus, essaie encore.";
-    }
-  };
-}
-
-// 10 - Suis le pattern (suite de couleurs)
-function jeuPattern() {
-  reset();
-  const colors = ['red','green','blue','yellow'];
-  const pattern = [];
-  let playerPattern = [];
-  let step = 0;
-
-  container.innerHTML = `<h2>Suis le pattern de couleurs !</h2>
-  <div id="pattern-boxes"></div>
-  <button id="startPattern" class="answer-btn">Commencer</button>`;
-
-  const patternBoxes = document.getElementById('pattern-boxes');
-  const startBtn = document.getElementById('startPattern');
-
-  function addColor() {
-    pattern.push(colors[Math.floor(Math.random()*colors.length)]);
-  }
-  function showPattern(i=0) {
-    if(i >= pattern.length) {
-      container.appendChild(startBtn);
-      startBtn.textContent = 'À toi ! Clique le pattern';
-      playerPattern = [];
-      step = 0;
-      return;
-    }
-    patternBoxes.innerHTML = '';
-    const c = document.createElement('div');
-    c.style.width = '100px';
-    c.style.height = '100px';
-    c.style.margin = 'auto';
-    c.style.borderRadius = '10px';
-    c.style.backgroundColor = pattern[i];
-    container.appendChild(patternBoxes);
-    setTimeout(() => {
-      c.style.backgroundColor = '#333';
-      setTimeout(() => showPattern(i+1), 300);
-    }, 700);
-  }
-
-  function createColorButtons() {
-    colors.forEach(col => {
-      const b = document.createElement('button');
-      b.style.backgroundColor = col;
-      b.style.width = '70px';
-      b.style.height = '70px';
-      b.style.margin = '10px';
-      b.style.border = 'none';
-      b.style.borderRadius = '50%';
-      b.style.cursor = 'pointer';
-      b.title = col;
-      b.onclick = () => {
-        playerPattern.push(col);
-        if (pattern[playerPattern.length-1] !== col) {
-          message.textContent = 'Perdu ! Mauvais pattern.';
-          startBtn.disabled = false;
-        } else if(playerPattern.length === pattern.length) {
-          message.textContent = 'Bravo ! Tu as réussi ce round.';
-          startBtn.disabled = false;
-        }
-      };
-      patternBoxes.appendChild(b);
-    });
-  }
-
-  startBtn.onclick = () => {
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+    container.innerHTML = '';
     message.textContent = '';
-    startBtn.disabled = true;
-    addColor();
-    patternBoxes.innerHTML = '';
-    createColorButtons();
-    showPattern();
-  };
+}
+
+// Appel initial
+checkAllGamesCompleted();
+
+// --- Fonctions des 10 nouveaux jeux ---
+
+// Défi 1: Devine le chiffre
+function jeuDevineChiffre() {
+    reset();
+    const chiffreSecret = Math.floor(Math.random() * 100) + 1;
+    let tentatives = 0;
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 1: Devine le chiffre</h2>
+        <p>Devine un nombre entre 1 et 100.</p>
+        <input type="number" id="guessInput" />
+        <br/><br/>
+        <button class="answer-btn" id="guessBtn">Valider</button>
+    `;
+    document.getElementById('guessBtn').onclick = () => {
+        const guess = parseInt(document.getElementById('guessInput').value);
+        if (isNaN(guess)) {
+            document.getElementById('message').textContent = "Entrez un nombre valide.";
+            return;
+        }
+        tentatives++;
+        if (guess === chiffreSecret) {
+            document.getElementById('message').textContent = `Bravo ! Tu as trouvé en ${tentatives} tentatives ! Défi réussi !`;
+            completeDefi('devinechiffre');
+        } else if (guess < chiffreSecret) {
+            document.getElementById('message').textContent = `C'est plus grand. Essaie encore.`;
+        } else {
+            document.getElementById('message').textContent = `C'est plus petit. Essaie encore.`;
+        }
+    };
+}
+
+// Défi 2: Mot mélangé
+function jeuMotMelange() {
+    reset();
+    const mots = ["ÉTOILE", "ORDINATEUR", "PROGRAMMATION", "CODAGE", "JEUX"];
+    const motSecret = mots[Math.floor(Math.random() * mots.length)];
+    const motMelange = motSecret.split('').sort(() => 0.5 - Math.random()).join('');
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 2: Mot mélangé</h2>
+        <p>Remets les lettres dans le bon ordre : <b>${motMelange}</b></p>
+        <input type="text" id="motInput" />
+        <br/><br/>
+        <button class="answer-btn" id="motBtn">Valider</button>
+    `;
+    document.getElementById('motBtn').onclick = () => {
+        const reponse = document.getElementById('motInput').value.toUpperCase().trim();
+        if (reponse === motSecret) {
+            document.getElementById('message').textContent = 'Bravo, défi réussi !';
+            completeDefi('melange');
+        } else {
+            document.getElementById('message').textContent = `Faux, essaie encore.`;
+        }
+    };
+}
+
+// Défi 3: Compte les fruits
+function jeuCompteFruits() {
+    reset();
+    const fruits = ['🍎', '🍌', '🍇', '🍎', '🍌', '🍎', '🍇', '🍌', '🍎'];
+    const fruitAChoisir = fruits[Math.floor(Math.random() * fruits.length)];
+    const count = fruits.filter(f => f === fruitAChoisir).length;
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 3: Compte les fruits</h2>
+        <p>Combien y a-t-il de **${fruitAChoisir}** ?</p>
+        <h3>${fruits.join(' ')}</h3>
+        <input type="number" id="countInput" />
+        <br/><br/>
+        <button class="answer-btn" id="countBtn">Valider</button>
+    `;
+    document.getElementById('countBtn').onclick = () => {
+        const reponse = parseInt(document.getElementById('countInput').value);
+        if (reponse === count) {
+            document.getElementById('message').textContent = 'Bravo, défi réussi !';
+            completeDefi('compte');
+        } else {
+            document.getElementById('message').textContent = `Faux, essaie encore.`;
+        }
+    };
+}
+
+// Défi 4: Ordre alphabétique
+function jeuOrdreAlpha() {
+    reset();
+    const mots = ["HTML", "CSS", "JAVASCRIPT", "PYTHON"];
+    const shuffled = [...mots].sort(() => Math.random() - 0.5);
+    const sorted = [...mots].sort();
+    let index = 0;
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+    container.innerHTML = `
+        <h2>Défi 4: Ordre alphabétique</h2>
+        <p>Clique sur les mots dans le bon ordre :</p>
+        <div id="alpha-btns"></div>
+    `;
+    const btnDiv = document.getElementById('alpha-btns');
+    shuffled.forEach(mot => {
+        const btn = document.createElement('button');
+        btn.textContent = mot;
+        btn.classList.add('answer-btn');
+        btn.onclick = () => {
+            if (mot === sorted[index]) {
+                index++;
+                message.textContent = `Bonne réponse !`;
+                btn.disabled = true;
+                if (index === mots.length) {
+                    message.textContent = `Bravo, défi réussi !`;
+                    completeDefi('ordrealpha');
+                }
+            } else {
+                message.textContent = `Faux, le prochain mot est ${sorted[index]}. Recommence !`;
+                setTimeout(() => jeuOrdreAlpha(), 2000);
+            }
+        };
+        btnDiv.appendChild(btn);
+    });
+}
+
+// Défi 5: Couleurs en mémoire
+function jeuCouleurMemoire() {
+    reset();
+    const couleurs = ['red', 'blue', 'green', 'yellow'];
+    let sequence = [];
+    const sequenceLength = 4;
+    let index = 0;
+    let playing = false;
+
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+
+    container.innerHTML = `
+        <h2>Défi 5: Couleurs en mémoire</h2>
+        <p>Regarde bien la séquence de couleurs, puis reproduis-la.</p>
+        <div id="color-lights" style="display:flex; justify-content:center; gap:10px;"></div>
+        <div id="color-btns" style="margin-top:20px;"></div>
+    `;
+
+    const lightsDiv = document.getElementById('color-lights');
+    const btnsDiv = document.getElementById('color-btns');
+    
+    couleurs.forEach(c => {
+        const light = document.createElement('div');
+        light.style.width = '50px';
+        light.style.height = '50px';
+        light.style.backgroundColor = 'gray';
+        light.style.borderRadius = '50%';
+        light.style.border = '2px solid white';
+        light.id = `light-${c}`;
+        lightsDiv.appendChild(light);
+
+        const btn = document.createElement('button');
+        btn.classList.add('answer-btn');
+        btn.style.backgroundColor = c;
+        btn.textContent = '';
+        btn.onclick = () => {
+            if (playing) return;
+            checkSequence(c);
+        };
+        btnsDiv.appendChild(btn);
+    });
+
+    function playSequence() {
+        playing = true;
+        sequence = [];
+        for (let i = 0; i < sequenceLength; i++) {
+            sequence.push(couleurs[Math.floor(Math.random() * couleurs.length)]);
+        }
+        let i = 0;
+        const interval = setInterval(() => {
+            if (i >= sequence.length) {
+                clearInterval(interval);
+                playing = false;
+                index = 0;
+                message.textContent = 'À ton tour !';
+                return;
+            }
+            const light = document.getElementById(`light-${sequence[i]}`);
+            light.style.backgroundColor = sequence[i];
+            setTimeout(() => {
+                light.style.backgroundColor = 'gray';
+            }, 500);
+            i++;
+        }, 1000);
+    }
+
+    function checkSequence(color) {
+        if (color === sequence[index]) {
+            index++;
+            if (index === sequence.length) {
+                message.textContent = 'Bravo ! Défi réussi !';
+                completeDefi('couleurmemoire');
+            }
+        } else {
+            message.textContent = 'Faux ! Recommence...';
+            setTimeout(() => jeuCouleurMemoire(), 2000);
+        }
+    }
+    
+    playSequence();
+}
+
+// Défi 6: Énigmes
+function jeuEnigmes() {
+    reset();
+    const enigmes = [
+        { q: "Qu'est-ce qui a des dents mais ne peut pas manger ?", a: "un râteau" },
+        { q: "Je suis un fruit qui a des pépins. Qui suis-je ?", a: "pomme" },
+        { q: "Je suis à la fois un animal et un vêtement. Qui suis-je ?", a: "pull" }
+    ];
+    const enigme = enigmes[Math.floor(Math.random() * enigmes.length)];
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 6: Énigmes</h2>
+        <p>${enigme.q}</p>
+        <input type="text" id="enigmeInput" />
+        <br/><br/>
+        <button class="answer-btn" id="enigmeBtn">Valider</button>
+    `;
+    document.getElementById('enigmeBtn').onclick = () => {
+        const reponse = document.getElementById('enigmeInput').value.toLowerCase().trim();
+        if (reponse === enigme.a) {
+            document.getElementById('message').textContent = 'Excellente logique, défi réussi !';
+            completeDefi('riddles');
+        } else {
+            document.getElementById('message').textContent = 'Mauvaise réponse. Réfléchis bien...';
+        }
+    };
+}
+
+// Défi 7: Le Poids Idéal
+function jeuPoidsIdeal() {
+    reset();
+    const objets = [
+        { nom: "un chat", poids: 4, unit: "kg" },
+        { nom: "un téléphone", poids: 200, unit: "g" },
+        { nom: "une voiture", poids: 1, unit: "tonne" }
+    ];
+    const obj = objets[Math.floor(Math.random() * objets.length)];
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 7: Le Poids Idéal</h2>
+        <p>Quel est le poids idéal pour **${obj.nom}** ?</p>
+        <input type="number" id="poidsInput" placeholder="Poids en ${obj.unit}" />
+        <br/><br/>
+        <button class="answer-btn" id="poidsBtn">Valider</button>
+    `;
+    document.getElementById('poidsBtn').onclick = () => {
+        const poids = parseFloat(document.getElementById('poidsInput').value);
+        if (poids === obj.poids) {
+            document.getElementById('message').textContent = `Bravo ! C'est le poids idéal. Défi réussi !`;
+            completeDefi('poids');
+        } else if (poids < obj.poids) {
+            document.getElementById('message').textContent = `C'est trop léger. Essaie encore !`;
+        } else {
+            document.getElementById('message').textContent = `C'est trop lourd. Essaie encore !`;
+        }
+    };
+}
+
+// Défi 8: Vérité ou Mensonge
+function jeuVeriteMensonge() {
+    reset();
+    const declarations = [
+        { d: "L'eau bout à 100°C à pression atmosphérique standard.", a: true },
+        { d: "Le Mont Blanc est la plus haute montagne du monde.", a: false },
+        { d: "Les fourmis n'ont pas de poumons.", a: true },
+        { d: "Une girafe a la même longueur de cou que le cou d'un être humain.", a: false }
+    ];
+    let index = 0;
+    let score = 0;
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+    
+    function showDeclaration() {
+        if(index >= declarations.length) {
+            container.innerHTML = `<h3>Fini ! Score : ${score} / ${declarations.length}</h3>`;
+            if (score === declarations.length) {
+                message.textContent = "Défi réussi !";
+                completeDefi('veritefaux');
+            } else {
+                message.textContent = "Défi échoué. Essaie encore.";
+            }
+            return;
+        }
+        const d = declarations[index];
+        container.innerHTML = `<h2>${d.d}</h2>`;
+        const btnVrai = document.createElement('button');
+        btnVrai.textContent = 'Vrai';
+        btnVrai.classList.add('answer-btn');
+        btnVrai.onclick = () => answer(true);
+        container.appendChild(btnVrai);
+
+        const btnFaux = document.createElement('button');
+        btnFaux.textContent = 'Faux';
+        btnFaux.classList.add('answer-btn');
+        btnFaux.onclick = () => answer(false);
+        container.appendChild(btnFaux);
+    }
+    function answer(val) {
+        if(val === declarations[index].a) score++;
+        index++;
+        showDeclaration();
+    }
+    showDeclaration();
+}
+
+// Défi 9: Le Symbole Manquant
+function jeuSymboleManquant() {
+    reset();
+    const series = [
+        { s: ['▲','●','■','▲','●','■','▲','●','?'], a: '■' },
+        { s: ['⭐','⚫️','⭐','⚫️','?','⚫️'], a: '⭐' },
+        { s: ['🍎','🍎','🍌','🍎','🍎','🍌','?','🍎','🍌'], a: '🍎' }
+    ];
+    const serie = series[Math.floor(Math.random()*series.length)];
+    const shuffledButtons = [...new Set(serie.s)].filter(s => s !== '?').sort(() => Math.random() - 0.5);
+    document.getElementById('game-container').innerHTML = `
+        <h2>Défi 9: Le Symbole Manquant</h2>
+        <p>Quel est le symbole manquant dans cette série ?</p>
+        <h3>${serie.s.join(' ')}</h3>
+    `;
+    const btnDiv = document.createElement('div');
+    shuffledButtons.forEach(s => {
+        const btn = document.createElement('button');
+        btn.textContent = s;
+        btn.classList.add('answer-btn');
+        btn.onclick = () => {
+            if (s === serie.a) {
+                document.getElementById('message').textContent = 'Bravo ! Défi réussi !';
+                completeDefi('symbole');
+            } else {
+                document.getElementById('message').textContent = 'Faux, essaie encore.';
+            }
+        };
+        btnDiv.appendChild(btn);
+    });
+    document.getElementById('game-container').appendChild(btnDiv);
+}
+
+// Défi 10: La Série de Formes (connecte les formes)
+function jeuSerieFormes() {
+    reset();
+    const formes = ['square', 'circle', 'triangle', 'square', 'circle', 'triangle'];
+    const shuffled = [...formes].sort(() => Math.random() - 0.5);
+    let index = 0;
+    const container = document.getElementById('game-container');
+    const message = document.getElementById('message');
+    container.innerHTML = `
+        <h2>Défi 10: La Série de Formes</h2>
+        <p>Clique sur les formes dans cet ordre : Carré, Cercle, Triangle.</p>
+        <div id="shapes-grid"></div>
+    `;
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    grid.style.gap = '15px';
+
+    const shapeMap = {
+        square: '<span>■</span>',
+        circle: '<span>●</span>',
+        triangle: '<span>▲</span>'
+    };
+
+    shuffled.forEach(forme => {
+        const btn = document.createElement('button');
+        btn.innerHTML = shapeMap[forme];
+        btn.classList.add('answer-btn');
+        btn.onclick = () => {
+            if(forme === formes[index]) {
+                index++;
+                btn.disabled = true;
+                message.textContent = 'Bonne forme !';
+                if(index === formes.length / 2) {
+                    message.textContent = 'Bravo ! Défi réussi !';
+                    completeDefi('seriesuite');
+                }
+            } else {
+                message.textContent = 'Mauvaise forme ! Recommence.';
+                setTimeout(() => jeuSerieFormes(), 2000);
+            }
+        };
+        grid.appendChild(btn);
+    });
+    container.appendChild(grid);
 }
 </script>
-
 </body>
 </html>
